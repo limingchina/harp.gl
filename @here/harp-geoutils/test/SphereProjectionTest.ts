@@ -64,7 +64,9 @@ describe("SphereProjection", function() {
 
     samples.forEach(([geoPoint, expectedWorldPoint]) => {
         // tslint:disable-next-line: max-line-length
-        it(`ProjectPoint (${geoPoint.latitude}, ${geoPoint.longitude}, ${geoPoint.altitude})`, function() {
+        it(`ProjectPoint (${geoPoint.latitude}, ${geoPoint.longitude}, ${
+            geoPoint.altitude
+        })`, function() {
             const worldPoint = sphereProjection.projectPoint(geoPoint);
 
             assert.approximately(expectedWorldPoint.x, worldPoint.x, epsilon);
@@ -115,7 +117,9 @@ describe("SphereProjection", function() {
 
         insidePoints.forEach(geoPoint => {
             // tslint:disable-next-line: max-line-length
-            it(`ProjectBox contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${geoPoint.altitude}`, function() {
+            it(`ProjectBox contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${
+                geoPoint.altitude
+            }`, function() {
                 const p = sphereProjection.projectPoint(geoPoint);
                 assert.isTrue(contains(worldBox, p));
             });
@@ -123,7 +127,9 @@ describe("SphereProjection", function() {
 
         outsidePoints.forEach(geoPoint => {
             // tslint:disable-next-line: max-line-length
-            it(`ProjectBox !contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${geoPoint.altitude}`, function() {
+            it(`ProjectBox !contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${
+                geoPoint.altitude
+            }`, function() {
                 const p = sphereProjection.projectPoint(geoPoint);
                 assert.isFalse(contains(worldBox, p));
             });
@@ -156,7 +162,9 @@ describe("SphereProjection", function() {
 
         insidePoints.forEach(geoPoint => {
             // tslint:disable-next-line: max-line-length
-            it(`ProjectBigBox contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${geoPoint.altitude}`, function() {
+            it(`ProjectBigBox contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${
+                geoPoint.altitude
+            }`, function() {
                 const p = sphereProjection.projectPoint(geoPoint);
                 assert.isTrue(contains(worldBox, p));
             });
@@ -164,7 +172,9 @@ describe("SphereProjection", function() {
 
         outsidePoints.forEach(geoPoint => {
             // tslint:disable-next-line: max-line-length
-            it(`ProjectBigBox !contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${geoPoint.altitude}`, function() {
+            it(`ProjectBigBox !contains ${geoPoint.latitude}, ${geoPoint.longitude}, ${
+                geoPoint.altitude
+            }`, function() {
                 const p = sphereProjection.projectPoint(geoPoint);
                 assert.isFalse(contains(worldBox, p));
             });

@@ -220,9 +220,11 @@ export namespace HighPrecisionUtils {
                 if (positionVec.length % 3 !== 0) {
                     throw Error("Positions must be 3D, not 2D");
                 }
-                (positions as number[]).forEach((n: number): void => {
-                    addHPValue(n);
-                });
+                (positions as number[]).forEach(
+                    (n: number): void => {
+                        addHPValue(n);
+                    }
+                );
             }
 
             return {

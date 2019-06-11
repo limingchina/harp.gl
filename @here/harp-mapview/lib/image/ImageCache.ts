@@ -312,7 +312,9 @@ export class ImageCache {
                     if (context !== null) {
                         logger.log(
                             // tslint:disable-next-line: max-line-length
-                            `... finished creating bitmap image in canvas: ${imageItem.url} ${image}`
+                            `... finished creating bitmap image in canvas: ${
+                                imageItem.url
+                            } ${image}`
                         );
                         context.drawImage(
                             image,

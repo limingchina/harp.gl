@@ -11,6 +11,7 @@ import {
     Sky,
     Theme
 } from "@here/harp-datasource-protocol";
+import { SceneState } from "@here/harp-geometry";
 import {
     EarthConstants,
     GeoCoordinates,
@@ -526,7 +527,7 @@ export const MapViewDefaults = {
  * The core class of the library to call in order to create a map visualization. It needs to be
  * linked to datasources.
  */
-export class MapView extends THREE.EventDispatcher {
+export class MapView extends THREE.EventDispatcher implements SceneState {
     /**
      * The string of the default font catalog to use for labelling.
      */
@@ -2606,7 +2607,9 @@ export class MapView extends THREE.EventDispatcher {
                 if (!light) {
                     logger.log(
                         // tslint:disable-next-line: max-line-length
-                        `MapView: failed to create light ${lightDescription.name} of type ${lightDescription.type}`
+                        `MapView: failed to create light ${lightDescription.name} of type ${
+                            lightDescription.type
+                        }`
                     );
                     return;
                 }

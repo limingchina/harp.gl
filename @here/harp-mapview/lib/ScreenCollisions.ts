@@ -150,7 +150,11 @@ export class ScreenCollisionsDebug extends ScreenCollisions {
         if (this.m_renderingEnabled) {
             logger.log(
                 // tslint:disable-next-line: max-line-length
-                `Allocations: ${this.m_numAllocations} Successful Tests: ${this.m_numSuccessfulTests} Failed Tests: ${this.m_numFailedTests}  Successful Visibility Tests: ${this.m_numSuccessfulVisibilityTests}  Failed Visibility Tests: ${this.m_numFailedVisibilityTests} `
+                `Allocations: ${this.m_numAllocations} Successful Tests: ${
+                    this.m_numSuccessfulTests
+                } Failed Tests: ${this.m_numFailedTests}  Successful Visibility Tests: ${
+                    this.m_numSuccessfulVisibilityTests
+                }  Failed Visibility Tests: ${this.m_numFailedVisibilityTests} `
             );
         }
 

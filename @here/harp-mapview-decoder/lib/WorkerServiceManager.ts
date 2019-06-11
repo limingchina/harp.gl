@@ -75,7 +75,9 @@ export class WorkerServiceManager extends WorkerService {
             if (existingService !== undefined) {
                 throw Error(
                     // tslint:disable-next-line: max-line-length
-                    `error - service with targetServiceId='${request.targetServiceId}' already running, ignoring CreateService request`
+                    `error - service with targetServiceId='${
+                        request.targetServiceId
+                    }' already running, ignoring CreateService request`
                 );
             }
 
