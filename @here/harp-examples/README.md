@@ -45,6 +45,7 @@ We can group the examples by several categories, looking at what kind of feature
 
 1. [The how-to for custom features](src/features.ts) demonstrates the process of adding features.
 1. [A more advanced example](src/features_custom.ts) mingles Harp's capabilities with custom features to realize an engaging visualization.
+1. [A GeoJSON viewer](src/geojson.ts) allows to view and edit GeoJSON with the FeaturesDataSource.
 
 ### Styling
 
