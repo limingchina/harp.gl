@@ -592,6 +592,7 @@ export class MapView extends THREE.EventDispatcher {
     private readonly m_fog: MapViewFog = new MapViewFog(this.m_scene);
     private readonly m_mapTilesRoot = new THREE.Object3D();
     private readonly m_mapAnchors = new THREE.Object3D();
+    private readonly m_mapDebugObjects = new THREE.Object3D();
 
     private m_animationCount: number = 0;
     private m_animationFrameHandle: number | undefined;
@@ -2273,6 +2274,9 @@ export class MapView extends THREE.EventDispatcher {
         while (this.m_mapTilesRoot.children.length > 0) {
             this.m_mapTilesRoot.remove(this.m_mapTilesRoot.children[0]);
         }
+        while (this.m_mapDebugObjects.children.length > 0) {
+            this.m_mapDebugObjects.remove(this.m_mapDebugObjects.children[0]);
+        }
 
         if (gatherStatistics) {
             setupTime = PerformanceTimer.now();
@@ -2286,6 +2290,7 @@ export class MapView extends THREE.EventDispatcher {
                 Math.floor(this.zoomLevel),
                 this.getEnabledTileDataSources(),
                 this.m_elevationRangeSource
+                // this.m_mapDebugObjects
             );
         }
 
@@ -2764,6 +2769,7 @@ export class MapView extends THREE.EventDispatcher {
 
         this.m_scene.add(this.m_mapTilesRoot);
         this.m_scene.add(this.m_mapAnchors);
+        this.m_scene.add(this.m_mapDebugObjects);
     }
 
     /**

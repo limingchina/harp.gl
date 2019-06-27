@@ -13,6 +13,7 @@ import { TileGeometryManager } from "./geometry/TileGeometryManager";
 import { MapTileCuller } from "./MapTileCuller";
 import { Tile } from "./Tile";
 import { MapViewUtils, TileOffsetUtils } from "./Utils";
+import { BoxGeometry, Mesh } from "three";
 
 /**
  * Way the memory consumption of a tile is computed. Either in number of tiles, or in MegaBytes. If
@@ -264,7 +265,8 @@ export class VisibleTileSet {
         storageLevel: number,
         zoomLevel: number,
         dataSources: DataSource[],
-        elevationRangeSource?: ElevationRangeSource
+        elevationRangeSource?: ElevationRangeSource,
+        debugScene?: THREE.Object3D
     ) {
         this.m_viewProjectionMatrix.multiplyMatrices(
             this.m_camera.projectionMatrix,
@@ -303,6 +305,44 @@ export class VisibleTileSet {
                     : areaDiff;
             });
 
+            if (debugScene !== undefined) {
+                const projection = this.projection;
+                const ts = dataSource.getTilingScheme();
+                const material = new THREE.MeshBasicMaterial({
+                    color: "yellow",
+                    wireframe: true,
+                    wireframeLinewidth: 2.0,
+                    depthTest: false
+                });
+                for (const visibleTile of visibleTiles) {
+                    const tileKey = visibleTile.tileKey;
+                    const geoBox = ts.getGeoBox(tileKey);
+                    const obb = projection.projectBox(geoBox, new OrientedBox3());
+
+                    // const geometry = new THREE.Geometry();
+                    // const ext = obb.extents;
+                    // geometry.vertices.push(
+                    //     new THREE.Vector3(-ext.x, -ext.y, 0),
+                    //     new THREE.Vector3(ext.x, -ext.y, 0),
+                    //     new THREE.Vector3(ext.x, ext.y, 0),
+                    //     new THREE.Vector3(-ext.x, ext.y, 0)
+                    // );
+
+                    const geometry = new BoxGeometry(
+                        2.0 * obb.extents.x,
+                        2.0 * obb.extents.y,
+                        2.0 * obb.extents.z
+                    );
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    obb.getCenter(mesh.position);
+                    mesh.position.sub(worldCenter);
+                    mesh.setRotationFromMatrix(obb.getRotationMatrix());
+                    mesh.renderOrder = 10000;
+                    mesh.updateMatrixWorld(true);
+                    debugScene.add(mesh);
+                }
+            }
             const actuallyVisibleTiles: Tile[] = [];
             let allDataSourceTilesLoaded = true;
             let numTilesLoading = 0;
