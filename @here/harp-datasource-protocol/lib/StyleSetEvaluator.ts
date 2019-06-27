@@ -9,6 +9,11 @@ import { LoggerManager } from "@here/harp-utils";
 import { Expr, MapEnv } from "./Expr";
 import { isInterpolatedPropertyDefinition } from "./InterpolatedProperty";
 import { InterpolatedPropertyDefinition, InterpolationMode } from "./InterpolatedPropertyDefs";
+import {
+    StringEncodedNumeralFormat,
+    StringEncodedNumeralFormats,
+    StringEncodedNumeralType
+} from "./StringEncodedNumeral";
 import { IndexedTechnique, Technique } from "./Techniques";
 import { Style, StyleSet } from "./Theme";
 
@@ -267,22 +272,74 @@ export class StyleSetEvaluator {
                 Object.getOwnPropertyNames(currStyle.attr).forEach(property => {
                     const prop = (currStyle.attr as any)[property];
                     if (isInterpolatedPropertyDefinition(prop)) {
+                        removeDuplicatePropertyValues(prop);
+                        const propKeys = new Float32Array(prop.zoomLevels);
+                        let propValues;
+                        let maskValues;
                         switch (typeof prop.values[0]) {
                             default:
                             case "number":
-                                technique[property] = createInterpolatedProperty(
-                                    prop as InterpolatedPropertyDefinition<number>
-                                );
+                                propValues = new Float32Array((prop.values as any[]) as number[]);
+                                technique[property] = {
+                                    interpolationMode:
+                                        prop.interpolation !== undefined
+                                            ? InterpolationMode[prop.interpolation]
+                                            : InterpolationMode.Discrete,
+                                    zoomLevels: propKeys,
+                                    values: propValues,
+                                    exponent: prop.exponent
+                                };
                                 break;
                             case "boolean":
-                                technique[property] = createInterpolatedProperty(
-                                    prop as InterpolatedPropertyDefinition<boolean>
-                                );
+                                propValues = new Float32Array(prop.values.length);
+                                for (let i = 0; i < prop.values.length; ++i) {
+                                    propValues[i] = ((prop.values[i] as unknown) as boolean)
+                                        ? 1
+                                        : 0;
+                                }
+                                technique[property] = {
+                                    interpolationMode: InterpolationMode.Discrete,
+                                    zoomLevels: propKeys,
+                                    values: propValues,
+                                    exponent: prop.exponent
+                                };
                                 break;
                             case "string":
-                                technique[property] = createInterpolatedProperty(
-                                    prop as InterpolatedPropertyDefinition<string>
+                                let needsMask = false;
+
+                                const matchedFormat = StringEncodedNumeralFormats.find(format =>
+                                    format.regExp.test((prop.values[0] as unknown) as string)
                                 );
+                                if (matchedFormat === undefined) {
+                                    logger.error(
+                                        `No StringEncodedNumeralFormat matched ${property}.`
+                                    );
+                                    break;
+                                }
+                                propValues = new Float32Array(
+                                    prop.values.length * matchedFormat.size
+                                );
+                                maskValues = new Float32Array(prop.values.length);
+                                needsMask = procesStringEnocodedNumeralInterpolatedProperty(
+                                    matchedFormat,
+                                    prop as InterpolatedPropertyDefinition<string>,
+                                    propValues,
+                                    maskValues
+                                );
+
+                                technique[property] = {
+                                    interpolationMode:
+                                        prop.interpolation !== undefined
+                                            ? InterpolationMode[prop.interpolation]
+                                            : InterpolationMode.Discrete,
+                                    zoomLevels: propKeys,
+                                    values: propValues,
+                                    exponent: prop.exponent,
+                                    _stringEncodedNumeralType: matchedFormat.type,
+                                    _stringEncodedNumeralDynamicMask: needsMask
+                                        ? maskValues
+                                        : undefined
+                                };
                                 break;
                         }
                     } else {
@@ -317,57 +374,71 @@ function removeDuplicatePropertyValues<T>(p: InterpolatedPropertyDefinition<T>) 
     }
 }
 
-function createInterpolatedProperty<T>(prop: InterpolatedPropertyDefinition<T>) {
-    removeDuplicatePropertyValues(prop);
-    const propKeys = new Float32Array(prop.zoomLevels);
-    let propValues;
-    switch (typeof prop.values[0]) {
-        default:
-        case "number":
-            propValues = new Float32Array((prop.values as any[]) as number[]);
-            return {
-                interpolationMode:
-                    prop.interpolation !== undefined
-                        ? InterpolationMode[prop.interpolation]
-                        : InterpolationMode.Discrete,
-                zoomLevels: propKeys,
-                values: propValues,
-                exponent: prop.exponent
-            };
-        case "boolean":
-            propValues = new Float32Array(prop.values.length);
-            for (let i = 0; i < prop.values.length; ++i) {
-                propValues[i] = ((prop.values[i] as unknown) as boolean) ? 1 : 0;
-            }
-            return {
-                interpolationMode: InterpolationMode.Discrete,
-                zoomLevels: propKeys,
-                values: propValues,
-                exponent: prop.exponent
-            };
-        case "string":
-            propValues = new Float32Array(prop.values.length * 3);
-            for (let i = 0; i < prop.values.length; ++i) {
-                const value = +((prop.values[i] as unknown) as string).replace("#", "0x");
-                // tslint:disable:no-bitwise
-                const channels = [
-                    ((value >> 16) & 255) / 255,
-                    ((value >> 8) & 255) / 255,
-                    ((value >> 0) & 255) / 255
-                ];
-                // tslint:disable:bitwise
-                for (let j = 0; j < prop.values.length * 3; ++j) {
-                    propValues[i * 3 + j] = channels[j];
+function procesStringEnocodedNumeralInterpolatedProperty(
+    format: StringEncodedNumeralFormat,
+    prop: InterpolatedPropertyDefinition<string>,
+    propValues: Float32Array,
+    maskValues: Float32Array
+): boolean {
+    let needsMask = false;
+    if (
+        format.type === StringEncodedNumeralType.Meters ||
+        format.type === StringEncodedNumeralType.Pixels
+    ) {
+        for (let elementIdx = 0; elementIdx < prop.values.length; ++elementIdx) {
+            for (
+                let formatIdx = StringEncodedNumeralType.Meters;
+                formatIdx <= StringEncodedNumeralType.Pixels;
+                ++formatIdx
+            ) {
+                if (
+                    StringEncodedNumeralFormats[formatIdx].regExp.test((prop.values[
+                        elementIdx
+                    ] as unknown) as string)
+                ) {
+                    maskValues[elementIdx] =
+                        formatIdx === StringEncodedNumeralType.Pixels ? 1.0 : 0.0;
+                    needsMask = needsMask || maskValues[elementIdx] === 1.0;
+
+                    const result = StringEncodedNumeralFormats[formatIdx].decoder((prop.values[
+                        elementIdx
+                    ] as unknown) as string);
+                    for (let i = 0; i < result.length; ++i) {
+                        propValues[elementIdx * StringEncodedNumeralFormats[formatIdx].size + i] =
+                            result[i];
+                    }
+                    break;
                 }
             }
-            return {
-                interpolationMode:
-                    prop.interpolation !== undefined
-                        ? InterpolationMode[prop.interpolation]
-                        : InterpolationMode.Discrete,
-                zoomLevels: propKeys,
-                values: propValues,
-                exponent: prop.exponent
-            };
+        }
+    } else if (
+        format.type === StringEncodedNumeralType.Hex ||
+        format.type === StringEncodedNumeralType.RGB ||
+        format.type === StringEncodedNumeralType.HSL
+    ) {
+        for (let elementIdx = 0; elementIdx < prop.values.length; ++elementIdx) {
+            for (
+                let formatIdx = StringEncodedNumeralType.Hex;
+                formatIdx <= StringEncodedNumeralType.HSL;
+                ++formatIdx
+            ) {
+                if (
+                    StringEncodedNumeralFormats[formatIdx].regExp.test((prop.values[
+                        elementIdx
+                    ] as unknown) as string)
+                ) {
+                    const result = StringEncodedNumeralFormats[formatIdx].decoder((prop.values[
+                        elementIdx
+                    ] as unknown) as string);
+                    for (let i = 0; i < result.length; ++i) {
+                        propValues[elementIdx * StringEncodedNumeralFormats[formatIdx].size + i] =
+                            result[i];
+                    }
+                    break;
+                }
+            }
+        }
     }
+
+    return needsMask;
 }
