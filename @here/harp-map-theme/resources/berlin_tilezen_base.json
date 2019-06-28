@@ -74,6 +74,11 @@
             "url": "maki_icons.png",
             "preload": true,
             "atlas": "maki_icons.json"
+        },
+        "road_shields_day_mapbox": {
+            "url": "road_shields_mapbox.png",
+            "preload": true,
+            "atlas": "road_shields_mapbox.json"
         }
     },
     "poiTables": [
@@ -86,19 +91,125 @@
     "styles": {
         "tilezen": [
             {
-                "description": "highway-label",
-                "when": "$layer == 'roads' && ((kind == 'highway') && ((kind_detail == 'motorway')))",
-                "technique": "text",
+                "description": "highway-roadshield-2",
+                "when": "$layer == 'roads' && (kind == 'highway') && (kind_detail == 'motorway') && has(ref) && (length(ref) <= 2)",
+                "technique": "line-marker",
                 "attr": {
-                    "color": "#000000",
-                    "backgroundColor": "#FFFFFF",
-                    "backgroundOpacity": 0.5,
-                    "size": 16,
-                    "priority": 25,
-                    "fadeNear": 0.8,
-                    "fadeFar": 0.9
+                    "style": "smallSign",
+                    "label": "ref",
+                    "size": 12,
+                    "imageTexture": "default-2",
+                    "iconScale": 1.5,
+                    "priority": 64,
+                    "minDistance": 200,
+                    "vAlignment": "Center",
+                    "hAlignment": "Center",
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": false,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true,
+                    "color": "#000000"
                 },
-                "renderOrder": 10
+                "renderOrder": 14.2
+            },
+            {
+                "description": "highway-roadshield-3, level > 7",
+                "when": "$layer == 'roads' && (kind == 'highway') && (kind_detail == 'motorway') && has(ref) && (length(ref) == 3) && ($level > 7)",
+                "technique": "line-marker",
+                "attr": {
+                    "style": "smallSign",
+                    "label": "ref",
+                    "size": 12,
+                    "imageTexture": "default-3",
+                    "iconScale": 1.5,
+                    "priority": 63,
+                    "minDistance": 200,
+                    "vAlignment": "Center",
+                    "hAlignment": "Center",
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": false,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true,
+                    "color": "#000000"
+                },
+                "renderOrder": 14.3
+            },
+            {
+                "description": "highway-roadshield-4, level > 8",
+                "when": "$layer == 'roads' && (kind == 'highway') && (kind_detail == 'motorway') && has(ref) && (length(ref) == 4) && ($level > 8)",
+                "technique": "line-marker",
+                "attr": {
+                    "style": "smallSign",
+                    "label": "ref",
+                    "size": 10,
+                    "imageTexture": "default-4",
+                    "iconScale": 1.3,
+                    "priority": 62,
+                    "minDistance": 200,
+                    "vAlignment": "Center",
+                    "hAlignment": "Center",
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": false,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true,
+                    "color": "#000000"
+                },
+                "renderOrder": 14.4
+            },
+            {
+                "description": "highway-roadshield-5, level > 8",
+                "when": "$layer == 'roads' && (kind == 'highway') && (kind_detail == 'motorway') && has(ref) && (length(ref) == 5) && ($level > 8)",
+                "technique": "line-marker",
+                "attr": {
+                    "style": "smallSign",
+                    "label": "ref",
+                    "size": 10,
+                    "imageTexture": "default-5",
+                    "iconScale": 1.3,
+                    "priority": 61,
+                    "minDistance": 200,
+                    "vAlignment": "Center",
+                    "hAlignment": "Center",
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": false,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true,
+                    "color": "#000000"
+                },
+                "renderOrder": 14.5
+            },
+            {
+                "description": "highway-roadshield-5+, invisible",
+                "when": "$layer == 'roads' && (kind == 'highway') && (kind_detail == 'motorway') && has(ref) && (length(ref) > 5) && ($level > 8)",
+                "technique": "line-marker",
+                "attr": {
+                    "style": "smallSign",
+                    "label": "ref",
+                    "size": 9.5,
+                    "imageTexture": "default-6",
+                    "iconScale": 1.2,
+                    "priority": 60,
+                    "minDistance": 200,
+                    "vAlignment": "Center",
+                    "hAlignment": "Center",
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": true,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "showOnMap": false,
+                    "renderTextDuringMovements": true,
+                    "color": "#000000"
+                },
+                "renderOrder": 14.6
             },
             {
                 "description": "highway-outline",
@@ -161,17 +272,27 @@
                 "final": true
             },
             {
-                "description": "primary",
-                "when": "$layer == 'roads' && ((kind == 'major_road') && kind_detail in ['primary']))",
-                "technique": "text",
+                "description": "primary-road-shield",
+                "when": "$layer == 'roads' && ((kind == 'major_road') && (kind_detail == 'primary') && has(ref) && (length(ref) < 7) && ($level > 10))",
+                "technique": "line-marker",
                 "attr": {
+                    "label": "ref",
                     "color": "#000000",
                     "backgroundColor": "#FFFFFF",
                     "backgroundOpacity": 0.5,
-                    "size": 16,
+                    "size": 10.5,
+                    "imageTexture": "default-6",
+                    "iconScale": 1.1,
                     "priority": 20,
                     "fadeNear": 0.8,
-                    "fadeFar": 0.9
+                    "fadeFar": 0.9,
+                    "minDistance": 300,
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": true,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true
                 },
                 "renderOrder": 13
             },
@@ -246,21 +367,32 @@
                 "final": true
             },
             {
-                "description": "secondary-label",
-                "when": "$layer == 'roads' && ((kind == 'major_road') && (kind_detail == 'secondary')))",
-                "technique": "text",
+                "description": "secondary-road-shield",
+                "when": "$layer == 'roads' && ((kind == 'major_road') && (kind_detail == 'secondary') && has(ref) && (length(ref) < 6) && ($level > 11))",
+                "technique": "line-marker",
                 "attr": {
+                    "label": "ref",
                     "color": "#000000",
                     "backgroundColor": "#FFFFFF",
                     "backgroundOpacity": 0.5,
-                    "size": 16,
-                    "priority": 15,
+                    "size": 8.5,
+                    "imageTexture": "default-5",
+                    "iconScale": 1.0,
+                    "priority": 20,
                     "fadeNear": 0.8,
-                    "fadeFar": 0.9
+                    "fadeFar": 0.9,
+                    "minDistance": 300,
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": true,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true
                 },
                 "renderOrder": 12
             },
             {
+                "description": "secondary-fill",
                 "when": "$layer == 'roads' && ((kind == 'major_road') && (kind_detail == 'secondary')))",
                 "technique": "solid-line",
                 "attr": {
@@ -285,20 +417,29 @@
                 "final": true
             },
             {
-                "description": "tertiary-label",
-                "when": "$layer == 'roads' && ((kind == 'major_road') && kind_detail in ['tertiary']))",
-                "technique": "text",
+                "description": "tertiary-label, level > 13",
+                "when": "$layer == 'roads' && ((kind == 'major_road') && (kind_detail == 'tertiary') && ($level > 13))",
+                "technique": "line-marker",
                 "attr": {
+                    "label": "ref",
                     "color": "#000000",
                     "backgroundColor": "#FFFFFF",
                     "backgroundOpacity": 0.5,
-                    "size": 16,
+                    "size": 7,
+                    "imageTexture": "default-5",
+                    "iconScale": 0.9,
                     "priority": 20,
                     "fadeNear": 0.8,
                     "fadeFar": 0.9,
-                    "clipping": false
+                    "minDistance": 200,
+                    "textIsOptional": false,
+                    "iconIsOptional": false,
+                    "textMayOverlap": true,
+                    "iconMayOverlap": false,
+                    "iconReserveSpace": true,
+                    "renderTextDuringMovements": true
                 },
-                "renderOrder": 13
+                "renderOrder": 11
             },
             {
                 "description": "tertiary-outline",
